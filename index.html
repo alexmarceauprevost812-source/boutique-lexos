@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body style="margin:0">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Boutique LexOS</title>
+<style>
+  /* Layout : vitrine sombre « terminal », en-tête neofetch + grille de cartes produit */
+  :root{
+    --bg:#0b0d10;
+    --panel:#12161b;
+    --panel-2:#171c22;
+    --line:#242c35;
+    --fg:#e8ecf1;
+    --muted:#8b97a6;
+    --orange:#ff7a18;
+    --orange-soft:#ffa24d;
+    --lime:#b6ff3c;
+    --gold:#ffcf4d;
+    --ok:#3ad07a;
+    --shadow:0 10px 30px rgba(0,0,0,.45);
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:"Space Grotesk",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ color-scheme:dark } }
+  :root[data-theme="dark"]{ color-scheme:dark }
+  /* Boutique volontairement en thème sombre unique (écran terminal) : couleurs explicites */
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(255,122,24,.10), transparent 60%),
+      var(--bg);
+    color:var(--fg);
+    font-family:var(--sans);
+    line-height:1.5;
+  }
+  .wrap{
+    max-width:1040px;margin:0 auto;
+    padding-left:max(16px,env(safe-area-inset-left,0px));
+    padding-right:max(16px,env(safe-area-inset-right,0px));
+    padding-block:28px 56px;
+  }
+
+  /* ---- En-tête terminal ---- */
+  .term{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line);border-radius:16px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .term-bar{
+    display:flex;align-items:center;gap:8px;
+    padding:12px 16px;border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,.015);
+  }
+  .dot{width:11px;height:11px;border-radius:50%}
+  .dot.r{background:#ff5f56}.dot.y{background:#ffbd2e}.dot.g{background:#27c93f}
+  .term-title{margin-left:8px;font-family:var(--mono);font-size:.82rem;color:var(--muted)}
+  .term-body{padding:22px 20px;font-family:var(--mono);font-size:.92rem}
+  .prompt{color:var(--muted)}
+  .prompt b{color:var(--orange);font-weight:600}
+  .neo{display:grid;grid-template-columns:auto 1fr;gap:4px 18px;margin-top:14px}
+  .neo .k{color:var(--orange-soft)}
+  .neo .v{color:var(--fg)}
+  h1{
+    font-family:var(--sans);font-weight:700;letter-spacing:-.02em;
+    font-size:clamp(1.8rem,6vw,2.6rem);margin:16px 0 4px;text-wrap:balance;
+  }
+  h1 .lex{color:var(--orange)}
+  .tagline{color:var(--muted);margin:0;font-size:1rem}
+
+  /* ---- Grille produits ---- */
+  .grid{
+    display:grid;gap:18px;margin-top:32px;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  }
+  .card{
+    display:flex;flex-direction:column;
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    box-shadow:var(--shadow);position:relative;
+    transition:transform .18s ease,border-color .18s ease;
+  }
+  .card:hover{transform:translateY(-3px);border-color:rgba(255,122,24,.5)}
+  .card.feature{border-color:rgba(255,122,24,.55)}
+  .ribbon{
+    position:absolute;top:14px;right:-34px;transform:rotate(45deg);
+    background:var(--orange);color:#160c02;font-family:var(--mono);
+    font-size:.68rem;font-weight:700;letter-spacing:.08em;
+    padding:4px 40px;text-transform:uppercase;
+  }
+  /* vignette dessinée */
+  .thumb{
+    aspect-ratio:16/10;max-width:100%;
+    display:flex;align-items:center;justify-content:center;position:relative;
+    font-family:var(--mono);overflow:hidden;
+    border-bottom:1px solid var(--line);
+  }
+  .thumb .glyph{font-size:2.6rem;font-weight:700;letter-spacing:.04em}
+  .t-usbc{background:radial-gradient(120% 120% at 20% 10%,#2a1402,#0c0905)}
+  .t-usbc .glyph{color:var(--orange)}
+  .t-codex{background:radial-gradient(120% 120% at 80% 10%,#1a1406,#0a0a06)}
+  .t-codex .glyph{color:var(--gold)}
+  .t-pro{background:radial-gradient(120% 120% at 50% 0%,#241001,#0b0805)}
+  .t-pro .glyph{color:var(--orange-soft)}
+  .t-shot{background:#000;padding:0}
+  .t-shot img{width:100%;height:100%;object-fit:cover;display:block}
+  .t-icon{background:radial-gradient(120% 120% at 50% 20%,#1a0d02,#000);padding:0}
+  .t-icon img{width:72%;height:72%;object-fit:contain;display:block;filter:drop-shadow(0 6px 18px rgba(255,122,24,.35))}
+  .scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px);pointer-events:none}
+
+  .card-body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:10px;flex:1}
+  .pname{font-family:var(--mono);font-size:1.15rem;font-weight:700;margin:0;color:var(--fg)}
+  .pname .c{color:var(--orange)}
+  .pdesc{margin:0;color:var(--muted);font-size:.92rem;min-width:0}
+  .meta{margin:6px 0 0;font-family:var(--mono);font-size:.74rem;color:var(--muted);letter-spacing:.02em;border-top:1px solid var(--line);padding-top:10px}
+  .feats{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
+  .feats li{font-size:.86rem;color:var(--fg);padding-left:18px;position:relative}
+  .feats li::before{content:"▸";position:absolute;left:0;color:var(--orange)}
+  .price-row{display:flex;align-items:baseline;gap:8px;margin-top:auto;padding-top:6px}
+  .price{font-family:var(--mono);font-size:1.7rem;font-weight:700;color:var(--lime);font-variant-numeric:tabular-nums}
+  .price .cur{font-size:1rem;color:var(--muted)}
+  .buy{
+    display:block;text-align:center;text-decoration:none;
+    background:var(--orange);color:#160c02;font-weight:700;
+    font-family:var(--sans);font-size:1rem;
+    padding:13px 16px;border-radius:11px;margin-top:4px;
+    transition:background .15s ease,transform .1s ease;
+  }
+  .buy:hover{background:var(--orange-soft)}
+  .buy:active{transform:scale(.98)}
+  .buy:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+
+  /* ---- Pied ---- */
+  footer{margin-top:40px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.82rem;line-height:1.8}
+  footer .sig{color:var(--orange-soft)}
+  .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 12px;margin-top:10px;color:var(--muted)}
+  .pill b{color:var(--lime)}
+</style>
+
+<div class="wrap">
+
+  <section class="term" aria-label="En-tête LexOS">
+    <div class="term-bar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="term-title">alex@lexos — boutique</span>
+    </div>
+    <div class="term-body">
+      <div class="prompt"><b>alex@lexos</b>:<span style="color:var(--orange-soft)">~</span>$ ./boutique --liste</div>
+      <div class="neo">
+        <span class="k">Système</span><span class="v">LexOS · orange néon</span>
+        <span class="k">Appareil</span><span class="v">Samsung Galaxy A55</span>
+        <span class="k">Produits</span><span class="v">3 disponibles</span>
+        <span class="k">Paiement</span><span class="v">Stripe · CAD · sécurisé</span>
+        <span class="k">Auteur</span><span class="v">Alex Marceau Prevost</span>
+      </div>
+      <h1>Boutique <span class="lex">LexOS</span></h1>
+      <p class="tagline">Mes applis Android, signées et prêtes à installer. Un produit, un prix.</p>
+    </div>
+  </section>
+
+  <main class="grid">
+
+    <!-- LexOS USB-C : vedette -->
+    <article class="card feature">
+      <span class="ribbon">Vedette</span>
+      <div class="thumb t-shot"><img src="img0.jpg" alt="Bureau LexOS avec terminal TI-LEX"><span class="scan"></span></div>
+      <div class="card-body">
+        <h2 class="pname">LexOS <span class="c">USB-C</span></h2>
+        <p class="pdesc">L'édition LexOS la plus complète, avec le moteur d'animation <b>lexos-moteur</b>. Tout LexOS PRO, plus les effets et les couleurs de l'édition avancée.</p>
+        <ul class="feats">
+          <li>Moteur d'animation : zoom sur l'icône, nom lettre par lettre, pluie Matrix</li>
+          <li>Pluie Matrix au déverrouillage</li>
+          <li>Orange par défaut + 8 couleurs au choix</li>
+          <li>Recherche avec IA locale (Ollama)</li>
+          <li>Tout le contenu de LexOS PRO inclus</li>
+        </ul>
+        <p class="meta">Android · Samsung Galaxy A55 / S25 Ultra · APK signé</p>
+        <div class="price-row"><span class="price">35<span class="cur">,00 $</span></span></div>
+        <a class="buy" href="https://buy.stripe.com/14A14n3Fk9THdTk1ga53O0s" target="_blank" rel="noopener">Acheter</a>
+      </div>
+    </article>
+
+    <!-- CodexLocal -->
+    <article class="card">
+      <div class="thumb t-shot"><img src="img1.jpg" alt="CodexLocal en marche"><span class="scan"></span></div>
+      <div class="card-body">
+        <h2 class="pname">Codex<span class="c">Local</span></h2>
+        <p class="pdesc">L'atelier qui signe et fabrique tes APK directement sur le téléphone — même sans ordi et sans internet, au chalet.</p>
+        <ul class="feats">
+          <li>Signe tes APK sur le téléphone, hors ligne</li>
+          <li>Studio de fabrication intégré</li>
+          <li>Importe ta propre clé de signature (.jks / .p12)</li>
+          <li>IA intégrée pour t'aider</li>
+          <li>Mises à jour entre tes versions sans désinstaller</li>
+        </ul>
+        <p class="meta">Android · outil de développeur · APK signé</p>
+        <div class="price-row"><span class="price">25<span class="cur">,99 $</span></span></div>
+        <a class="buy" href="https://buy.stripe.com/dRm4gzcbQaXL6qS1ga53O0u" target="_blank" rel="noopener">Acheter</a>
+      </div>
+    </article>
+
+    <!-- LexOS PRO -->
+    <article class="card">
+      <div class="thumb t-icon"><img src="img2.jpg" alt="Icône LexOS PRO"><span class="scan"></span></div>
+      <div class="card-body">
+        <h2 class="pname">LexOS <span class="c">PRO</span></h2>
+        <p class="pdesc">Le lanceur Android LexOS complet : ton téléphone devient un vrai terminal orange néon. L'entrée dans l'univers LexOS.</p>
+        <ul class="feats">
+          <li>Accueil terminal (neofetch, heure en caractères chinois)</li>
+          <li>Clavier néon + 80 émojis LexOS</li>
+          <li>Écran de verrouillage : météo, agenda, notifications</li>
+          <li>Pages d'applis, panneau latéral, titres animés</li>
+          <li>Page Santé de l'appareil et Paramètres</li>
+        </ul>
+        <p class="meta">Android · lanceur / thème · APK signé</p>
+        <div class="price-row"><span class="price">5<span class="cur">,23 $</span></span></div>
+        <a class="buy" href="https://buy.stripe.com/aFa14n7VAc1P8z07Ey53O0v" target="_blank" rel="noopener">Acheter</a>
+      </div>
+    </article>
+
+  </main>
+
+  <footer>
+    <div>Paiement sécurisé par Stripe · Prix en dollars canadiens</div>
+    <div class="sig">✦ LexOS — par Alex Marceau Prevost ✦</div>
+    <div class="pill">Produit du <b>Québec</b></div>
+  </footer>
+
+</div>
+
+</body>
+</html>
